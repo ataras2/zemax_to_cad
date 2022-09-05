@@ -9,7 +9,7 @@ import numpy as np
 import scipy.spatial.transform
 
 class Surface:
-    def __init__(self, surf_idx, coords, tilts, name):
+    def __init__(self, surf_idx, coords, tilts, name=None):
         self.surf_idx = surf_idx
         self.coords = coords
         self.tilts = tilts
@@ -32,9 +32,24 @@ class Surface:
             s = f'Surf {self.surf_idx}: coords {self.coords}, tilts: {self.tilts}'    
         return s
     
-
-    def isRotationMatrix(M):
-        tag = False
-        I = np.identity(M.shape[0])
-        if np.all((np.matmul(M, M.T)) == I) and (np.linalg.det(M)==1): tag = True
-        return tag    
+    def to_dict(self):
+        d = {}
+        d["surf_idx"] = self.surf_idx
+        
+        d["x"] = self.coords[0]
+        d["y"] = self.coords[1]
+        d["z"] = self.coords[2]
+        
+        d["tilt_x"] =self.tilts[0]
+        d["tilt_y"] =self.tilts[1]
+        d["tilt_z"] =self.tilts[2]
+        
+        if self.name is not None:
+            d["name"] = self.name
+        
+        return d
+    
+    
+    
+    
+    
