@@ -6,6 +6,7 @@ Created on Fri Sep  2 16:32:03 2022
 """
 
 import numpy as np
+import scipy.spatial.transform
 
 class Surface:
     def __init__(self, surf_idx, coords, tilts, name):
@@ -17,8 +18,12 @@ class Surface:
     def apply_transform(self, R=np.eye(3), T=np.zeros(3)):
         self.coords = R@self.coords + T
         
-        raise ValueError('not implemented fully (needs tilt correction too)')
-    
+        # convert tilt to rotm and then back
+        R_tilts = scipy.spatial.transform.Rotation.from_rotvec(
+                        np.deg2rad(self.tilts)).as_matrix()
+        overall_rotvec = scipy.spatial.transform.Rotation.from_matrix(
+                        R@R_tilts).as_rotvec()
+        self.tilts = np.rad2deg(overall_rotvec)
     
     def __str__(self):
         if self.name is not None:
@@ -26,3 +31,10 @@ class Surface:
         else:
             s = f'Surf {self.surf_idx}: coords {self.coords}, tilts: {self.tilts}'    
         return s
+    
+
+    def isRotationMatrix(M):
+        tag = False
+        I = np.identity(M.shape[0])
+        if np.all((np.matmul(M, M.T)) == I) and (np.linalg.det(M)==1): tag = True
+        return tag    
