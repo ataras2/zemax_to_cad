@@ -22,19 +22,54 @@ class Prescription_Writer:
         
         pass
 
-    def get_sw_line(surf : dict, key : str):
-        return f'"{surf["surf_idx"]}_{key}" = {surf[key]:.{Prescription_Writer.PRECISION}f}'
+    def get_sw_line(s : Surface, key : str, use_idx : bool = True):
+        surf = s.to_dict()
+        
+        assert (s.name is not None) or use_idx
+        
+        line = '"'
+        
+        if use_idx:
+            line += f'{surf["surf_idx"]}_'
+        
+        if s.name is not None:
+            line += f'{surf["name"]}_{key}" = {surf[key]:.{Prescription_Writer.PRECISION}f}'
+        else:
+            line += f'{key}" = {surf[key]:.{Prescription_Writer.PRECISION}f}'
+        return line
 
 
 
 if __name__ == "__main__":
     import numpy as np
     def test_get_sw_line():
-        s = Surface(0, np.array([0.1,0.,0.]), np.array([0.,45.,0.]), name=None)
+        s = Surface(0, np.array([0.1,0.,-0.4]), np.array([0.,45.,0.]), name=None)
         
-        assert Prescription_Writer.get_sw_line(s.to_dict(),"x") == '"0_x" = 0.100000'
-        assert Prescription_Writer.get_sw_line(s.to_dict(),"y") == '"0_y" = 0.000000'
-        assert Prescription_Writer.get_sw_line(s.to_dict(),"tilt_x") == '"0_tilt_x" = 0.000000'
+        assert Prescription_Writer.get_sw_line(s,"x") == '"0_x" = 0.100000'
+        assert Prescription_Writer.get_sw_line(s,"y") == '"0_y" = 0.000000'
+        assert Prescription_Writer.get_sw_line(s,"z") == '"0_z" = -0.400000'
+        assert Prescription_Writer.get_sw_line(s,"tilt_x") == '"0_tilt_x" = 0.000000'
+        assert Prescription_Writer.get_sw_line(s,"tilt_y") == '"0_tilt_y" = 45.000000'
+        assert Prescription_Writer.get_sw_line(s,"tilt_z") == '"0_tilt_z" = 0.000000'
+        
+        s = Surface(0, np.array([0.1,0.,-0.4]), np.array([0.,45.,0.]), name='text')
+        
+        assert Prescription_Writer.get_sw_line(s,"x") == '"0_text_x" = 0.100000'
+        assert Prescription_Writer.get_sw_line(s,"y") == '"0_text_y" = 0.000000'
+        assert Prescription_Writer.get_sw_line(s,"z") == '"0_text_z" = -0.400000'
+        assert Prescription_Writer.get_sw_line(s,"tilt_x") == '"0_text_tilt_x" = 0.000000'
+        assert Prescription_Writer.get_sw_line(s,"tilt_y") == '"0_text_tilt_y" = 45.000000'
+        assert Prescription_Writer.get_sw_line(s,"tilt_z") == '"0_text_tilt_z" = 0.000000'
+        
+        
+        s = Surface(0, np.array([0.1,0.,-0.4]), np.array([0.,45.,0.]), name='text')
+        
+        assert Prescription_Writer.get_sw_line(s,"x", False) == '"text_x" = 0.100000'
+        assert Prescription_Writer.get_sw_line(s,"y", False) == '"text_y" = 0.000000'
+        assert Prescription_Writer.get_sw_line(s,"z", False) == '"text_z" = -0.400000'
+        assert Prescription_Writer.get_sw_line(s,"tilt_x", False) == '"text_tilt_x" = 0.000000'
+        assert Prescription_Writer.get_sw_line(s,"tilt_y", False) == '"text_tilt_y" = 45.000000'
+        assert Prescription_Writer.get_sw_line(s,"tilt_z", False) == '"text_tilt_z" = 0.000000'
     
     test_get_sw_line()
     
