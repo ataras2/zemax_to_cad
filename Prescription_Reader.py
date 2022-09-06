@@ -19,10 +19,11 @@ class Prescription_Reader:
         Optional functionality includes doing coordinate changes (rotations, translations)
         on the data before writing
     """
-    def __init__(self, fname):
+    def __init__(self, fname, config=None):
         self.fname = fname
-        
+        self.config = config
         self.read_file()
+        
 
     def read_file(self):
         with open(self.fname) as f:
@@ -65,7 +66,7 @@ class Prescription_Reader:
             coords[i] = row_split[self.col.POS.value]
             tilts[i] = row_split[self.col.TILT.value]
         
-        return Surface(surf_idx, coords, tilts, name)
+        return Surface(surf_idx, coords, tilts, config=self.config, name=name)
     
     class col(Enum):
         SURF = 0
