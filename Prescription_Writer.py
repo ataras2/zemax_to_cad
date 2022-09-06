@@ -16,7 +16,7 @@ class Prescription_Writer:
     def __init__(self, outfile):
         self.outfile = outfile
         
-    def write_sw_txt(self, surfs : list[Surface], key_subset = ["x","y","z","tilt_x","tilt_y","tilt_z"]):
+    def write_sw_txt(self, surfs : list[Surface], key_subset = "all"):
         """ 
             write to a .txt in the form
             
@@ -40,17 +40,25 @@ class Prescription_Writer:
         
         if use_idx:
             line += f'{surf["surf_idx"]}_'
-        if s.name is not None:
-            line += f'{surf["name"]}_{key}" = {surf[key]:.{Prescription_Writer.PRECISION}f}'
-        else:
-            line += f'{key}" = {surf[key]:.{Prescription_Writer.PRECISION}f}'
             
+        if s.name is not None:
+            line += f'{surf["name"]}_{key}'
+        else:
+            line += f'{key}'
+            
+        if s.config is not None:
+            line += f'_{surf["config"]}'
+            
+        line += f'" = {surf[key]:.{Prescription_Writer.PRECISION}f}'
+        
         return line
 
 
     def get_key_subset(subset_name):
         subset_name = subset_name.lower()
-        if subset_name == "pos" or subset_name == "position":
+        if subset_name == "all":
+            l = ["x","y","z","tilt_x","tilt_y","tilt_z"]
+        elif subset_name == "pos" or subset_name == "position":
             l = ["x","y","z"]
         elif subset_name == "ang" or subset_name == "angles":
             l = ["tilt_x","tilt_y","tilt_z"]
@@ -95,6 +103,17 @@ if __name__ == "__main__":
         assert Prescription_Writer.get_sw_line(s,"tilt_x", False) == '"text_tilt_x" = 0.000000'
         assert Prescription_Writer.get_sw_line(s,"tilt_y", False) == '"text_tilt_y" = 45.000000'
         assert Prescription_Writer.get_sw_line(s,"tilt_z", False) == '"text_tilt_z" = 0.000000'
+        
+        
+        # test using config number
+        s = Surface(0, np.array([0.1,0.,-0.4]), np.array([0.,45.,0.]), config=2, name='text')
+        
+        assert Prescription_Writer.get_sw_line(s,"x", False) == '"text_x_2" = 0.100000'
+        assert Prescription_Writer.get_sw_line(s,"y", False) == '"text_y_2" = 0.000000'
+        assert Prescription_Writer.get_sw_line(s,"z", False) == '"text_z_2" = -0.400000'
+        assert Prescription_Writer.get_sw_line(s,"tilt_x", False) == '"text_tilt_x_2" = 0.000000'
+        assert Prescription_Writer.get_sw_line(s,"tilt_y", False) == '"text_tilt_y_2" = 45.000000'
+        assert Prescription_Writer.get_sw_line(s,"tilt_z", False) == '"text_tilt_z_2" = 0.000000'
     
     
     

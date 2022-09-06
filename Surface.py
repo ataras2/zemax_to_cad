@@ -9,10 +9,11 @@ import numpy as np
 import scipy.spatial.transform
 
 class Surface:
-    def __init__(self, surf_idx, coords, tilts, name=None):
+    def __init__(self, surf_idx, coords, tilts, config=None, name=None):
         self.surf_idx = surf_idx
         self.coords = coords
         self.tilts = tilts
+        self.config = config
         self.name = name
         
     def apply_transform(self, R=np.eye(3), T=np.zeros(3)):
@@ -43,6 +44,9 @@ class Surface:
         d["tilt_x"] =self.tilts[0]
         d["tilt_y"] =self.tilts[1]
         d["tilt_z"] =self.tilts[2]
+        
+        if self.config is not None:
+            d["config"] = self.config
         
         if self.name is not None:
             d["name"] = self.name
