@@ -27,10 +27,15 @@ class Surface:
         self.tilts = np.rad2deg(overall_rotvec)
     
     def __str__(self):
+        
+        s = ''
+        if self.config is not None:
+            s += f'Config {self.config}, '
+        
         if self.name is not None:
-            s = f'Surf {self.surf_idx} ({self.name}): coords {self.coords}, tilts: {self.tilts}'
+            s += f'Surf {self.surf_idx} ({self.name}): coords {self.coords}, tilts: {self.tilts}'
         else:
-            s = f'Surf {self.surf_idx}: coords {self.coords}, tilts: {self.tilts}'    
+            s += f'Surf {self.surf_idx}: coords {self.coords}, tilts: {self.tilts}'    
         return s
     
     def to_dict(self):
