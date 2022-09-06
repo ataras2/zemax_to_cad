@@ -43,6 +43,7 @@ class Prescription_Writer:
 if __name__ == "__main__":
     import numpy as np
     def test_get_sw_line():
+        # test default behaviour
         s = Surface(0, np.array([0.1,0.,-0.4]), np.array([0.,45.,0.]), name=None)
         
         assert Prescription_Writer.get_sw_line(s,"x") == '"0_x" = 0.100000'
@@ -52,6 +53,7 @@ if __name__ == "__main__":
         assert Prescription_Writer.get_sw_line(s,"tilt_y") == '"0_tilt_y" = 45.000000'
         assert Prescription_Writer.get_sw_line(s,"tilt_z") == '"0_tilt_z" = 0.000000'
         
+        # test with a name
         s = Surface(0, np.array([0.1,0.,-0.4]), np.array([0.,45.,0.]), name='text')
         
         assert Prescription_Writer.get_sw_line(s,"x") == '"0_text_x" = 0.100000'
@@ -61,7 +63,7 @@ if __name__ == "__main__":
         assert Prescription_Writer.get_sw_line(s,"tilt_y") == '"0_text_tilt_y" = 45.000000'
         assert Prescription_Writer.get_sw_line(s,"tilt_z") == '"0_text_tilt_z" = 0.000000'
         
-        
+        # test without using the surf indx
         s = Surface(0, np.array([0.1,0.,-0.4]), np.array([0.,45.,0.]), name='text')
         
         assert Prescription_Writer.get_sw_line(s,"x", False) == '"text_x" = 0.100000'
