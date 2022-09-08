@@ -31,14 +31,26 @@ class Prescription_Writer:
                 for key in key_subset:
                     f.write(Prescription_Writer.get_sw_line(surf, key) + '\n')
 
-    def get_sw_line(s : Surface, key : str, use_idx : bool = False):
+    def get_sw_line(s : Surface, key : str, use_surf_idx : bool = False, use_config = True) -> str:
+        """
+            return the string corresponding to a single line of the solidworks text file,
+            of the form
+
+            "global_variable_name" = value
+
+            inputs
+                s : surface object to be written
+                key : key of the surface object to use e.g. 'x' or 'tilt_x'
+                use_surf_idx : if the string should use the surface index of the object
+                use_config : if the string should use the config number
+        """
         surf = s.to_dict()
         
-        assert (s.name is not None) or use_idx
+        assert (s.name is not None) or use_surf_idx
         
         line = '"'
         
-        if use_idx:
+        if use_surf_idx:
             line += f'{surf["surf_idx"]}_'
             
         if s.name is not None:
@@ -46,7 +58,7 @@ class Prescription_Writer:
         else:
             line += f'{key}'
             
-        if s.config is not None:
+        if s.config is not None and use_config:
             line += f'_{surf["config"]}'
             
         line += f'" = {surf[key]:.{Prescription_Writer.PRECISION}f}'
