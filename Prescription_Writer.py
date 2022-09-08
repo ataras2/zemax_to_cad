@@ -16,11 +16,11 @@ class Prescription_Writer:
     def __init__(self, outfile):
         self.outfile = outfile
         
-    def write_sw_txt(self, surfs : list[Surface], key_subset = "all"):
+    def write_sw_txt(self, surfs : list[Surface], key_subset = "all", single_config_surfs = []):
         """ 
             write to a .txt in the form
             
-            "<surf_idx>_<name>_<[x,y,z]>" = <value>
+            "<surf_idx>_<name>_<[x,y,z,tilt_x,tilt_y,tilt_z]>" = <value>
         """
         
         if isinstance(key_subset, str):
@@ -28,8 +28,13 @@ class Prescription_Writer:
         
         with open(self.outfile, 'w') as f:
             for surf in surfs:
-                for key in key_subset:
-                    f.write(Prescription_Writer.get_sw_line(surf, key) + '\n')
+                if surf.name in single_config_surfs:
+                    if surf.config == 1:
+                        for key in key_subset:
+                            f.write(Prescription_Writer.get_sw_line(surf, key, use_config=False) + '\n')
+                else:
+                    for key in key_subset:
+                        f.write(Prescription_Writer.get_sw_line(surf, key) + '\n')
 
     def get_sw_line(s : Surface, key : str, use_surf_idx : bool = False, use_config = True) -> str:
         """
@@ -135,8 +140,10 @@ if __name__ == "__main__":
         pw = Prescription_Writer(fname)
         
         surfs = [
-              Surface(0, np.array([0.1,0.,-0.4]), np.array([0.,45.,0.]), name='text'),
-              Surface(0, np.array([0.1,0.,5.]), np.array([0.,45.,0.]), name='test2')
+              Surface(0, np.array([0.1,0.,-0.4]), np.array([0.,45.,0.]), name='text', config=1),
+              Surface(0, np.array([1.1,0.,-0.4]), np.array([0.,45.,0.]), name='text', config=2),
+              Surface(0, np.array([0.1,0.,5.]), np.array([0.,45.,0.]), name='test2', config=1),
+              Surface(0, np.array([1.1,0.,5.]), np.array([0.,45.,0.]), name='test2', config=2)
             ]
         pw.write_sw_txt(surfs)
         
@@ -147,7 +154,7 @@ if __name__ == "__main__":
         
         fname = 'outputs/test_write_sw_xzAng_only.txt'
         pw = Prescription_Writer(fname)
-        pw.write_sw_txt(surfs, key_subset="xzAng")
+        pw.write_sw_txt(surfs, key_subset="xzAng",single_config_surfs=['text'])
         
         
         

@@ -46,8 +46,8 @@ class Prescription2swTxt:
         for surf in self.all_surfs:
             surf.apply_transform(R,T)
 
-    def write_out(self, subset="all"):
-        self.writer.write_sw_txt(self.all_surfs, key_subset=subset)
+    def write_out(self, **kwargs):
+        self.writer.write_sw_txt(self.all_surfs, **kwargs)
 
 if __name__ == "__main__":
     
