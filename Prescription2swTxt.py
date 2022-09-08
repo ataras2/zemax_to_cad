@@ -10,7 +10,7 @@ from Prescription_Writer import Prescription_Writer
 
 import numpy as np
 
-class AT_ZOS:
+class Prescription2swTxt:
     """ 
         'Fine, I'll do it myself'
         
@@ -78,11 +78,14 @@ if __name__ == "__main__":
                          "DM"
                          ]
     
-    zos = AT_ZOS(in_fnames, out_fname, filter_names=surfs_of_interest)
+    zos = Prescription2swTxt(in_fnames, out_fname, filter_names=surfs_of_interest)
     
-# =============================================================================
-#     T = np.array([0,0,0])
-#     zos.transform_surfs(T=T)
-# =============================================================================
+    T = np.array([-510,200,150])
+    
+    R = np.array([[0, 0, 1],
+                  [0, 1, 0],
+                  [-1, 0, 0]])
+    
+    zos.transform_surfs(T=T, R=R)
     zos.write_out(subset="xzAng")
     
