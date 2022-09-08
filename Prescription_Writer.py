@@ -90,48 +90,6 @@ class Prescription_Writer:
 
 if __name__ == "__main__":
     import numpy as np
-    def test_get_sw_line():
-        # test default behaviour
-        s = Surface(0, np.array([0.1,0.,-0.4]), np.array([0.,45.,0.]), name=None)
-        
-        assert Prescription_Writer.get_sw_line(s,"x", True) == '"0_x" = 0.100000'
-        assert Prescription_Writer.get_sw_line(s,"y", True) == '"0_y" = 0.000000'
-        assert Prescription_Writer.get_sw_line(s,"z", True) == '"0_z" = -0.400000'
-        assert Prescription_Writer.get_sw_line(s,"tilt_x", True) == '"0_tilt_x" = 0.000000'
-        assert Prescription_Writer.get_sw_line(s,"tilt_y", True) == '"0_tilt_y" = 45.000000'
-        assert Prescription_Writer.get_sw_line(s,"tilt_z", True) == '"0_tilt_z" = 0.000000'
-        
-        # test with a name
-        s = Surface(0, np.array([0.1,0.,-0.4]), np.array([0.,45.,0.]), name='text')
-        
-        assert Prescription_Writer.get_sw_line(s,"x", True) == '"0_text_x" = 0.100000'
-        assert Prescription_Writer.get_sw_line(s,"y", True) == '"0_text_y" = 0.000000'
-        assert Prescription_Writer.get_sw_line(s,"z", True) == '"0_text_z" = -0.400000'
-        assert Prescription_Writer.get_sw_line(s,"tilt_x", True) == '"0_text_tilt_x" = 0.000000'
-        assert Prescription_Writer.get_sw_line(s,"tilt_y", True) == '"0_text_tilt_y" = 45.000000'
-        assert Prescription_Writer.get_sw_line(s,"tilt_z", True) == '"0_text_tilt_z" = 0.000000'
-        
-        # test without using the surf indx
-        s = Surface(0, np.array([0.1,0.,-0.4]), np.array([0.,45.,0.]), name='text')
-        
-        assert Prescription_Writer.get_sw_line(s,"x", False) == '"text_x" = 0.100000'
-        assert Prescription_Writer.get_sw_line(s,"y", False) == '"text_y" = 0.000000'
-        assert Prescription_Writer.get_sw_line(s,"z", False) == '"text_z" = -0.400000'
-        assert Prescription_Writer.get_sw_line(s,"tilt_x", False) == '"text_tilt_x" = 0.000000'
-        assert Prescription_Writer.get_sw_line(s,"tilt_y", False) == '"text_tilt_y" = 45.000000'
-        assert Prescription_Writer.get_sw_line(s,"tilt_z", False) == '"text_tilt_z" = 0.000000'
-        
-        
-        # test using config number
-        s = Surface(0, np.array([0.1,0.,-0.4]), np.array([0.,45.,0.]), config=2, name='text')
-        
-        assert Prescription_Writer.get_sw_line(s,"x", False) == '"text_x_2" = 0.100000'
-        assert Prescription_Writer.get_sw_line(s,"y", False) == '"text_y_2" = 0.000000'
-        assert Prescription_Writer.get_sw_line(s,"z", False) == '"text_z_2" = -0.400000'
-        assert Prescription_Writer.get_sw_line(s,"tilt_x", False) == '"text_tilt_x_2" = 0.000000'
-        assert Prescription_Writer.get_sw_line(s,"tilt_y", False) == '"text_tilt_y_2" = 45.000000'
-        assert Prescription_Writer.get_sw_line(s,"tilt_z", False) == '"text_tilt_z_2" = 0.000000'
-    
     
     
     def test_write_sw_txt():
@@ -157,10 +115,6 @@ if __name__ == "__main__":
         pw.write_sw_txt(surfs, key_subset="xzAng",single_config_surfs=['text'])
         
         
-        
-        
-    
-    test_get_sw_line()
     test_write_sw_txt()
     
     
