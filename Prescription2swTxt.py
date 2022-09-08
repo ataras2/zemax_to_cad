@@ -42,9 +42,29 @@ class Prescription2swTxt:
         all_surfs.sort(key = lambda x: x.surf_idx)
         return all_surfs
 
-    def transform_surfs(self, R=np.eye(3), T=np.zeros(3)):
+    def transform_surfs(self, R=np.eye(3), T=np.zeros(3), surf_subset=None):
+        """
+            apply transforms to all of the surfaces
+
+            inputs
+                R: rotation matrix
+                T: translation vector
+                surf_subset: a list of names of the surfaces to be transformed
+
+            output
+                None
+        """
+        if surf_subset is not None:
+            use_name = True
+        else:
+            use_name = False
+
         for surf in self.all_surfs:
-            surf.apply_transform(R,T)
+            if use_name:
+                if surf.name in surf_subset:
+                    surf.apply_transform(R,T)
+            else:
+                surf.apply_transform(R,T)
 
     def write_out(self, **kwargs):
         self.writer.write_sw_txt(self.all_surfs, **kwargs)
