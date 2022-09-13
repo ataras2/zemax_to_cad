@@ -11,3 +11,4 @@ A python interface to zemax config .txt files to import and export prescription 
 5. Set each mate to use the global variables and rebuild
 6. Every time you change zemax, repeat 2-3 and hit rebuild
 
+See the main of `Prescription2swTxt.py` for example usage
