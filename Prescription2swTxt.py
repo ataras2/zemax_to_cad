@@ -40,10 +40,11 @@ class Prescription2swTxt:
 
         if manual_surfs is not None:
             assert len(manual_surfs) > 0
-            all_surfs.append(*manual_surfs)
+            for surf in manual_surfs:
+                all_surfs.append(surf)
 
         # sort by surface index
-        all_surfs.sort(key = lambda x: x.surf_idx)
+        all_surfs.sort(key = lambda x: int(x.surf_idx))
         return all_surfs
 
     def transform_surfs(self, R=np.eye(3), T=np.zeros(3), surf_subset=None):
