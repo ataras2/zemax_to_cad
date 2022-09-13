@@ -65,8 +65,12 @@ class Prescription_Writer:
             
         if s.config is not None and use_config:
             line += f'_{surf["config"]}'
-            
-        line += f'" = {surf[key]:.{Prescription_Writer.PRECISION}f}'
+        
+        value = surf[key]
+        if key[0:4] == "tilt" and value < 0:
+            value += 360 # make it positive
+
+        line += f'" = {value:.{Prescription_Writer.PRECISION}f}'
         
         return line
 
