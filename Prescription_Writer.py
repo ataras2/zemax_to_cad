@@ -81,6 +81,8 @@ class Prescription_Writer:
             l = ["tilt_x","tilt_y","tilt_z"]
         elif subset_name == "xzang" or subset_name == "xzangle":
             l = ["x","z","tilt_y"]
+        elif subset_name == "xyzang" or subset_name == "xyzangle":
+            l = ["x","y","z","tilt_y"]
         else:
             raise ValueError(f"{subset_name} is not a valid key subset")
         

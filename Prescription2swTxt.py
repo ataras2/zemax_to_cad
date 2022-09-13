@@ -107,5 +107,5 @@ if __name__ == "__main__":
                   [-1, 0, 0]])
     
     zos.transform_surfs(T=T, R=R)
-    zos.write_out(subset="xzAng")
+    zos.write_out(subset="xyzAng")
     
