@@ -72,33 +72,21 @@ class Prescription2swTxt:
 if __name__ == "__main__":
     
     in_fnames = [
-            "data/hdllr_c1.txt",
-            "data/hdllr_c2.txt",
-            "data/hdllr_c3.txt",
-            "data/hdllr_c4.txt"
+            "data/coords_small_c1.txt",
+            "data/coords_small_c2.txt"
         ]
     
-    out_fname = "outputs/coords_hdllr_sw.txt"
-    
-# =============================================================================
-#     surfs_of_interest = ["OAP 1", 
-#                          "DM", 
-#                          "OAP 2", 
-#                          "Dichroic to Hi-5", 
-#                          "Focusing mirror", 
-#                          "Tip-tilt mirror",
-#                          "Knife-edge mirror",
-#                          "Fold mirror",
-#                          "LB5552-E"
-#                          ]
-# =============================================================================
+    import os
+
+
+    # Check whether the specified path exists or not
+    if not os.path.exists('outputs'):
+        os.makedirs('outputs')
+
+    out_fname = "outputs/coords_small_sw.txt"
     
     
-    surfs_of_interest = ["OAP 1", 
-                         "DM"
-                         ]
-    
-    zos = Prescription2swTxt(in_fnames, out_fname, filter_names=surfs_of_interest)
+    zos = Prescription2swTxt(in_fnames, out_fname)
     
     T = np.array([-510,200,150])
     
@@ -107,5 +95,5 @@ if __name__ == "__main__":
                   [-1, 0, 0]])
     
     zos.transform_surfs(T=T, R=R)
-    zos.write_out(subset="xyzAng")
+    zos.write_out(key_subset="xyzAng")
     
