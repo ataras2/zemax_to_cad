@@ -12,3 +12,7 @@ A python interface to zemax config .txt files to import and export prescription 
 6. Every time you change zemax, repeat 2-3 and hit rebuild
 
 See the main of `Prescription2swTxt.py` for example usage
+
+# Future work
+
+ - [ ] export to the mates directly (if mates are named well) e.g. using "D1@Part_Name_x_1"
