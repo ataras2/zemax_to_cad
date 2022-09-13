@@ -47,7 +47,7 @@ class Prescription2swTxt:
         all_surfs.sort(key = lambda x: int(x.surf_idx))
         return all_surfs
 
-    def transform_surfs(self, R=np.eye(3), T=np.zeros(3), surf_subset=None):
+    def transform_surfs(self, R=np.eye(3), T=np.zeros(3), surf_subset=[], exclude=[]):
         """
             apply transforms to all of the surfaces
 
@@ -55,19 +55,22 @@ class Prescription2swTxt:
                 R: rotation matrix
                 T: translation vector
                 surf_subset: a list of names of the surfaces to be transformed
+                exclude: a list of names of surfaces to exclude
 
             output
                 None
         """
-        if surf_subset is not None:
+        if surf_subset != [] or exclude != []:
             use_name = True
         else:
             use_name = False
 
         for surf in self.all_surfs:
             if use_name:
-                if surf.name in surf_subset:
-                    surf.apply_transform(R,T)
+                if surf.name in surf_subset or surf_subset == []:
+                    if not surf.name in exclude:
+                        # print("transforming", surf)
+                        surf.apply_transform(R,T)
             else:
                 surf.apply_transform(R,T)
 
