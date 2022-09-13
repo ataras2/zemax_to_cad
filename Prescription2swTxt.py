@@ -28,7 +28,7 @@ class Prescription2swTxt:
 
         self.all_surfs = self.filter_surfs(**kwargs)
 
-    def filter_surfs(self, filter_names = None):
+    def filter_surfs(self, filter_names = None, manual_surfs = None):
         all_surfs = []
         for reader in self.readers:
             for surf in reader.objs:
@@ -37,6 +37,9 @@ class Prescription2swTxt:
                 elif surf.name is not None:
                     if surf.name in filter_names:
                         all_surfs.append(surf)
+
+        if manual_surfs is not None:
+            all_surfs.append(*manual_surfs)
 
         # sort by surface index
         all_surfs.sort(key = lambda x: x.surf_idx)
