@@ -39,6 +39,7 @@ class Prescription2swTxt:
                         all_surfs.append(surf)
 
         if manual_surfs is not None:
+            assert len(manual_surfs) > 0
             all_surfs.append(*manual_surfs)
 
         # sort by surface index
