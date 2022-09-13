@@ -16,3 +16,4 @@ See the main of `Prescription2swTxt.py` for example usage
 # Future work
 
  - [ ] export to the mates directly (if mates are named well) e.g. using "D1@Part_Name_x_1"
+ - [ ] see if solidworks can deal with part name mates in main path rather than overall mates
