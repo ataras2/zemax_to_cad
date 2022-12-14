@@ -60,18 +60,25 @@ class Prescription2swTxt:
             output
                 None
         """
-        if surf_subset != [] or exclude != []:
+        if surf_subset != [] and exclude != []:
+            raise ValueError("Cannot take both a surface subset and exclusion")
+        elif surf_subset != [] or exclude != []:
             use_name = True
         else:
             use_name = False
 
-        for surf in self.all_surfs:
-            if use_name:
-                if surf.name in surf_subset or surf_subset == []:
-                    if not surf.name in exclude:
-                        # print("transforming", surf)
-                        surf.apply_transform(R,T)
-            else:
+        # deal with input into a single list
+        if surf_subset != []:
+            surfs_to_transform = [x for x in self.all_surfs if x.name in surf_subset]
+        elif exclude != []:
+            surfs_to_transform = [x for x in self.all_surfs if x.name not in exclude]
+
+
+        if use_name:
+            for surf in surfs_to_transform:
+                surf.apply_transform(R,T)
+        else:
+            for surf in self.all_surfs:
                 surf.apply_transform(R,T)
 
     def write_out(self, **kwargs):
