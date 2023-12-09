@@ -1,0 +1,29 @@
+[project]
+name = "zemax_to_cad"
+version = "0.0.1"
+description = "Manipulation of Zemax data with CAD files for faster design iterations with optomechanical systems"
+readme = "README.md"
+requires-python =">=3.8"
+license = {file = "LICENSE"}
+authors = [
+  {name = "Adam Taras", email = "adam.taras@sydney.edu.au"},
+]
+keywords = ["python", "optics", "Zemax", "Solidworks", "CAD", "optomechanics"]
+urls = {repository = "https://github.com/ataras2/zemax_to_cad"}
+dependencies = [
+    "numpy",]
+classifiers=[
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project.optional-dependencies]
+extras = ["jupyter", ]
+dev = ["pytest", "black",]
+
+[tool.black]
+line-length = 79
