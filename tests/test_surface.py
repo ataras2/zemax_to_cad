@@ -33,4 +33,4 @@ class TestSurface:
 
         s.transform(T=np.array([0.0, 0.0, 0.0]))
 
-        assert np.allclose(s.coords, np.array([0.1, 0.0, -0.3]))
+        assert np.allclose(s.coords, init_pos)

@@ -45,10 +45,26 @@ class StateSubset(Enum):
 
 class Surface:
     def __init__(self, surf_idx, coords, tilts, name=None):
-        self.surf_idx = surf_idx
-        self.coords = coords
-        self.tilts = tilts
-        self.name = name
+        self._surf_idx = surf_idx
+        self._coords = coords
+        self._tilts = tilts
+        self._name = name
+
+    @property
+    def index(self):
+        return self._surf_idx
+
+    @property
+    def coords(self):
+        return self._coords
+
+    @property
+    def tilts(self):
+        return self._tilts
+
+    @property
+    def name(self):
+        return self._name
 
     def transform(
         self, R: np.ndarray = np.eye(3), T: np.ndarray = np.zeros(3)
@@ -61,24 +77,24 @@ class Surface:
             T (np.ndarray, optional): Translation 3-vector. Defaults to
                 np.zeros(3), corresponding to no translation.
         """
-        self.coords = R @ self.coords + T
+        self._coords = R @ self._coords + T
 
         # convert tilt to rotm and then back
         R_tilts = scipy.spatial.transform.Rotation.from_rotvec(
-            np.deg2rad(self.tilts)
+            np.deg2rad(self._tilts)
         ).as_matrix()
         overall_rotvec = scipy.spatial.transform.Rotation.from_matrix(
             R @ R_tilts
         ).as_rotvec()
-        self.tilts = np.rad2deg(overall_rotvec)
+        self._tilts = np.rad2deg(overall_rotvec)
 
     def __str__(self):
         s = ""
 
-        if self.name is not None:
-            s += f"Surf {self.surf_idx} ({self.name}): coords {self.coords}, tilts: {self.tilts}"
+        if self._name is not None:
+            s += f"Surf {self._surf_idx} ({self._name}): coords {self._coords}, tilts: {self._tilts}"
         else:
-            s += f"Surf {self.surf_idx}: coords {self.coords}, tilts: {self.tilts}"
+            s += f"Surf {self._surf_idx}: coords {self._coords}, tilts: {self._tilts}"
         return s
 
     def to_cad_string(
@@ -112,16 +128,16 @@ class Surface:
         return "\n".join(s) + "\n"
 
     def _cad_identifier(self):
-        if self.name is not None:
-            return str(self.name)
-        return self.surf_idx
+        if self._name is not None:
+            return str(self._name)
+        return self._surf_idx
 
     def _get_state_value(self, subset: StateSubset):
         val = None
         if subset in StateSubset.LINEAR():
-            val = self.coords[subset.value]
+            val = self._coords[subset.value]
         if subset in StateSubset.ANGULAR():
-            val = self.tilts[subset.value - StateSubset.angular_start().value]
+            val = self._tilts[subset.value - StateSubset.angular_start().value]
 
         if val is None:
             raise ValueError(f"{subset} not found")
