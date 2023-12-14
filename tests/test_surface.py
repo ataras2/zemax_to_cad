@@ -32,5 +32,31 @@ class TestSurface:
         assert np.allclose(s.coords, init_pos)
 
         s.transform(T=np.array([0.0, 0.0, 0.0]))
-
         assert np.allclose(s.coords, init_pos)
+
+        s.transform(T=np.array([1.0, 0.0, 0.5]))
+        assert np.allclose(s.coords, np.array([1.0, 0.0, 0.5]) + init_pos)
+
+        s.transform(T=-np.array([1.0, 0.0, 0.5]))
+        assert np.allclose(s.coords, init_pos)
+
+        s.transform(R=np.eye(3), T=np.array([0.0, 0.0, 0.0]))
+        assert np.allclose(s.coords, init_pos)
+
+        R = np.array([[0, 1, 0], [1, 0, 0], [0, 0, -1]])
+        s.transform(R=R, T=np.array([0.0, 0.0, 0.0]))
+        assert np.allclose(
+            s.coords, np.array([init_pos[1], init_pos[0], -init_pos[2]])
+        )
+
+        # undo the transform
+        s.transform(R=R.T, T=np.array([0.0, 0.0, 0.0]))
+        assert np.allclose(s.coords, init_pos)
+
+        # now check order is also correct
+        s.transform(R=R, T=np.array([1.0, 0.0, 0.5]))
+        assert np.allclose(
+            s.coords,
+            np.array([1.0, 0.0, 0.5])
+            + np.array([init_pos[1], init_pos[0], -init_pos[2]]),
+        )
