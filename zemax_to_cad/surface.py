@@ -1,10 +1,10 @@
 from copy import deepcopy
 from enum import Enum
-from re import sub
-from shelve import DbfilenameShelf
 from typing import Sequence, Union
 import numpy as np
 import scipy.spatial.transform
+
+__all__ = ["Surface", "StateSubset"]
 
 
 class StateSubset(Enum):

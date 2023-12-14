@@ -1,11 +1,12 @@
-from typing import Self, Sequence
+from typing import Sequence
 
-from jax import config
 
 # from zemax_to_cad.surface import Surface
-from surface import Surface, StateSubset
+from zemax_to_cad.surface import Surface, StateSubset
 from enum import Enum
 import numpy as np
+
+__all__ = ["OpticalConfiguration", "MultiConfigSystem"]
 
 
 class PrescCols(Enum):
