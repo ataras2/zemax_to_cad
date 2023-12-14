@@ -5,13 +5,13 @@
 dist/
 .vscode/
 build/
-Jewelmasks.egg-info
+zemax_to_cad.egg-info
 docs/notebooks/files
 .idea/
 
 coverage_report
 
-data
+data/
 
 .vscode/
 .coverage
