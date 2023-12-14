@@ -50,18 +50,19 @@ class OpticalConfiguration:
                 if True, indicates that the surface should be written.
                 Defaults to writing all surfaces.
             format_filter_function (callable, optional): A function
-                surface -> StateSubset indicating what components of
+                surface -> list[StateSubset] indicating what components of
                 the position to write out. Defaults to writing all components.
         """
 
         for surf in self._get_safe_surface_filter(include_filter, bool):
             str_to_add = surf.to_cad_string(
                 OpticalConfiguration._safe_call_filter(
-                    format_filter_function, surf, StateSubset
+                    format_filter_function, surf, list
                 )
             )
 
             # add string to file
+            opened_file.write(str_to_add)
 
     def transform(
         self,
@@ -202,10 +203,7 @@ class MultiConfigSystem:
 
 if __name__ == "__main__":
     c = OpticalConfiguration.load_from_prescription_text(
-        "data/coords_small_c1.txt"
+        "docs/data/coords_small_c1.txt"
     )
 
-    fn = lambda x: x.name in ["Surface 1"]
-
-    for s in filter(fn, c.surfaces):
-        print(s)
+    c.file_write(open("test.txt", "w", encoding="utf-8"))
