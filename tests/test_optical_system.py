@@ -1,5 +1,6 @@
 import zemax_to_cad
 import os
+import numpy as np
 
 
 class TestOpticalConfiguration:
@@ -15,6 +16,7 @@ class TestOpticalConfiguration:
         assert c.surfaces[1].name == "Dichroic"
 
     def test_write(self):
+        """tests the simplest case of writing out a file"""
         data_fname = "tests/test_data.txt"
 
         c = zemax_to_cad.OpticalConfiguration.load_from_prescription_text(
@@ -23,7 +25,7 @@ class TestOpticalConfiguration:
 
         fname = "tests/test.txt"
         with open(fname, "w", encoding="utf-8") as f:
-            c.file_write(f)
+            c.file_write(f, use_config_number=False)
 
         with open(fname, "r", encoding="utf-8") as f:
             lines = f.readlines()
@@ -47,3 +49,55 @@ class TestOpticalConfiguration:
             assert any([string in line for line in lines])
 
         os.remove(fname)
+
+
+class TestMultiConfigSystem:
+    def test_load_from_multiple_configs(self):
+        c1 = "tests/test_data.txt"
+        c2 = "tests/test_data.txt"
+
+        instrument = zemax_to_cad.MultiConfigSystem.load_from_multiple_configs(
+            [c1, c2]
+        )
+
+        assert len(instrument.configs) == 2
+        assert instrument.configs[0].surfaces[0].name == "Surface 1"
+        assert instrument.configs[1].surfaces[0].name == "Surface 1"
+
+    def test_transform(self):
+        c1 = "tests/test_data.txt"
+        c2 = "tests/test_data.txt"
+
+        instrument = zemax_to_cad.MultiConfigSystem.load_from_multiple_configs(
+            [c1, c2]
+        )
+
+        c1_surf_1_pos_x = instrument.configs[0].surfaces[0].coords[0]
+        c2_surf_1_pos_x = instrument.configs[1].surfaces[0].coords[0]
+
+        c1_surf_2_pos_x = instrument.configs[0].surfaces[1].coords[0]
+        c2_surf_2_pos_x = instrument.configs[1].surfaces[1].coords[0]
+
+        instrument.transform(
+            R=[[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+            T=[-20.0, 0.0, 0.0],
+            filter_fn=lambda x: x.name in ["Surface 1"],
+        )
+
+        assert np.allclose(
+            instrument.configs[0].surfaces[0].coords[0],
+            c1_surf_1_pos_x - 20.0,
+        )
+        assert np.allclose(
+            instrument.configs[1].surfaces[0].coords[0],
+            c2_surf_1_pos_x - 20.0,
+        )
+
+        assert np.allclose(
+            instrument.configs[0].surfaces[1].coords[0],
+            c1_surf_2_pos_x,
+        )
+        assert np.allclose(
+            instrument.configs[1].surfaces[1].coords[0],
+            c2_surf_2_pos_x,
+        )

@@ -16,4 +16,6 @@ data/
 .coverage
 .pytest_cache
 
+test.txt
+
 ideas.md

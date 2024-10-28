@@ -38,14 +38,14 @@ class OpticalConfiguration:
     def file_write(
         self,
         opened_file,
+        use_config_number=True,
         include_filter: callable = lambda x: True,
         format_filter_function: callable = lambda x: StateSubset.ALL(),
     ):
         """Write out the surfaces of this object to a CAD readable txt file
 
-        Args: #TODO check type of opened_file
-            opened_file (_type_): A file object that is opened and we can
-                call write on.
+        Args:
+            opened_file (file): An open file to write to
             include_filter (callable): A function surface -> boolean that,
                 if True, indicates that the surface should be written.
                 Defaults to writing all surfaces.
@@ -53,12 +53,16 @@ class OpticalConfiguration:
                 surface -> list[StateSubset] indicating what components of
                 the position to write out. Defaults to writing all components.
         """
+        kwargs = {}
+        if use_config_number:
+            kwargs["config"] = self.config_number
 
         for surf in self._get_safe_surface_filter(include_filter, bool):
             str_to_add = surf.to_cad_string(
                 OpticalConfiguration._safe_call_filter(
                     format_filter_function, surf, list
-                )
+                ),
+                **kwargs,
             )
 
             # add string to file
@@ -195,15 +199,54 @@ class MultiConfigSystem:
                 format_filter_function,
             )
 
+    def transform(
+        self,
+        R: np.ndarray = np.eye(3),
+        T: np.ndarray = np.zeros(3),
+        filter_fn: callable = lambda x: True,
+    ):
+        """transform all surfaces in all configurations
+
+        See OpticalConfiguration.transform for argument details
+        """
+        for config in self.configs:
+            config.transform(R, T, filter_fn)
+
     @staticmethod
-    def load_from_multiple_configs(file_list, cofnig_numbers=None):
-        if cofnig_numbers is None:
-            cofnig_numbers = list(range(len(file_list)))
+    def load_from_multiple_configs(file_list, config_numbers=None):
+        if config_numbers is None:
+            config_numbers = list(range(1, 1 + len(file_list)))
+
+        configs = []
+        for i, file in enumerate(file_list):
+            config = OpticalConfiguration.load_from_prescription_text(
+                file, config_numbers[i]
+            )
+
+            configs.append(config)
+
+        return MultiConfigSystem(configs)
 
 
 if __name__ == "__main__":
-    c = OpticalConfiguration.load_from_prescription_text(
-        "docs/data/coords_small_c1.txt"
+    # c = OpticalConfiguration.load_from_prescription_text(
+    #     "docs/data/coords_small_c1.txt"
+    # )
+
+    # with open("test.txt", "w", encoding="utf-8") as f:
+    #     c.file_write(f)
+
+    instrument = MultiConfigSystem.load_from_multiple_configs(
+        ["docs/data/coords_small_c1.txt", "docs/data/coords_small_c2.txt"]
     )
 
-    c.file_write(open("test.txt", "w", encoding="utf-8"))
+    instrument.transform(
+        R=np.eye(3),
+        T=np.array([-1_000_000.0, 0.0, 0.0]),
+        filter_fn=lambda x: x.name in ["mirror"],
+    )
+
+    print(instrument.configs[0].surfaces[0])
+
+    with open("test.txt", "w", encoding="utf-8") as f:
+        instrument.file_write(f)
