@@ -50,6 +50,40 @@ class TestOpticalConfiguration:
 
         os.remove(fname)
 
+    def test_write_with_numbers(self):
+        data_fname = "tests/test_data.txt"
+
+        c = zemax_to_cad.OpticalConfiguration.load_from_prescription_text(
+            data_fname
+        )
+
+        fname = "tests/test.txt"
+        with open(fname, "w", encoding="utf-8") as f:
+            c.file_write(f, use_config_number=True)
+
+        with open(fname, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+
+            string = '"Surface 1_X_1"'
+            assert any([string in line for line in lines])
+
+            string = '"Surface 1_Y_1"'
+            assert any([string in line for line in lines])
+
+            string = '"Surface 1_Z_1"'
+            assert any([string in line for line in lines])
+
+            string = '"Surface 1_TILT_X_1"'
+            assert any([string in line for line in lines])
+
+            string = '"Surface 1_TILT_Y_1"'
+            assert any([string in line for line in lines])
+
+            string = '"Surface 1_TILT_Z_1"'
+            assert any([string in line for line in lines])
+
+        os.remove(fname)
+
 
 class TestMultiConfigSystem:
     def test_load_from_multiple_configs(self):
