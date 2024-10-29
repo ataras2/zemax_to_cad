@@ -97,6 +97,7 @@ class TestOpticalConfiguration:
                 f,
                 include_filter=lambda x: x.name in ["Surface 1"],
                 format_filter_function=lambda x: zemax_to_cad.StateSubset.ALL(),
+                use_config_number=False,
             )
 
         with open(fname, "r", encoding="utf-8") as f:

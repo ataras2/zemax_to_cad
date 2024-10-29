@@ -158,7 +158,7 @@ class OpticalConfiguration:
         if len(first_row) == PrescCols.NAME.value:
             name = None
         elif len(first_row) > PrescCols.NAME.value:
-            name = " ".join(first_row[PrescCols.NAME.value:])
+            name = " ".join(first_row[PrescCols.NAME.value :])
         else:
             raise ValueError(f"{first_row}")
 
@@ -236,17 +236,34 @@ if __name__ == "__main__":
     # with open("test.txt", "w", encoding="utf-8") as f:
     #     c.file_write(f)
 
-    instrument = MultiConfigSystem.load_from_multiple_configs(
-        ["docs/data/coords_small_c1.txt", "docs/data/coords_small_c2.txt"]
+    # instrument = MultiConfigSystem.load_from_multiple_configs(
+    #     ["docs/data/coords_small_c1.txt", "docs/data/coords_small_c2.txt"]
+    # )
+
+    # instrument.transform(
+    #     R=np.eye(3),
+    #     T=np.array([-1_000_000.0, 0.0, 0.0]),
+    #     filter_fn=lambda x: x.name in ["mirror"],
+    # )
+
+    # print(instrument.configs[0].surfaces[0])
+
+    # with open("test.txt", "w", encoding="utf-8") as f:
+    #     instrument.file_write(f)
+
+    data_fname = "tests/test_data.txt"
+
+    import zemax_to_cad
+
+    c = zemax_to_cad.OpticalConfiguration.load_from_prescription_text(
+        data_fname
     )
 
-    instrument.transform(
-        R=np.eye(3),
-        T=np.array([-1_000_000.0, 0.0, 0.0]),
-        filter_fn=lambda x: x.name in ["mirror"],
-    )
-
-    print(instrument.configs[0].surfaces[0])
-
-    with open("test.txt", "w", encoding="utf-8") as f:
-        instrument.file_write(f)
+    fname = "tests/test.txt"
+    with open(fname, "w", encoding="utf-8") as f:
+        c.file_write(
+            f,
+            include_filter=lambda x: x.name in ["Surface 1"],
+            format_filter_function=lambda x: zemax_to_cad.StateSubset.ALL(),
+            use_config_number=False,
+        )
