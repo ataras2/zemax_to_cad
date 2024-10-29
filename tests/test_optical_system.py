@@ -84,6 +84,63 @@ class TestOpticalConfiguration:
 
         os.remove(fname)
 
+    def test_write_with_surface_filter(self):
+        data_fname = "tests/test_data.txt"
+
+        c = zemax_to_cad.OpticalConfiguration.load_from_prescription_text(
+            data_fname
+        )
+
+        fname = "tests/test.txt"
+        with open(fname, "w", encoding="utf-8") as f:
+            c.file_write(
+                f,
+                include_filter=lambda x: x.name in ["Surface 1"],
+                format_filter_function=lambda x: zemax_to_cad.StateSubset.ALL(),
+            )
+
+        with open(fname, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+
+            string = '"Surface 1_X"'
+            assert any(string in line for line in lines)
+
+            string = '"Surface 1_Y"'
+            assert any(string in line for line in lines)
+
+            string = '"Surface 1_Z"'
+            assert any(string in line for line in lines)
+
+            string = '"Surface 1_TILT_X"'
+            assert any(string in line for line in lines)
+
+            string = '"Surface 1_TILT_Y"'
+            assert any(string in line for line in lines)
+
+            string = '"Surface 1_TILT_Z"'
+            assert any(string in line for line in lines)
+
+            # negative checks on the other surface
+            string = '"Dichroic_X"'
+            assert not any(string in line for line in lines)
+
+            string = '"Dichroic_Y"'
+            assert not any(string in line for line in lines)
+
+            string = '"Dichroic_Z"'
+            assert not any(string in line for line in lines)
+
+            string = '"Dichroic_TILT_X"'
+            assert not any(string in line for line in lines)
+
+            string = '"Dichroic_TILT_Y"'
+            assert not any(string in line for line in lines)
+
+            string = '"Dichroic_TILT_Z"'
+            assert not any(string in line for line in lines)
+
+        os.remove(fname)
+
 
 class TestMultiConfigSystem:
     def test_load_from_multiple_configs(self):

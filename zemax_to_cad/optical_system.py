@@ -158,7 +158,7 @@ class OpticalConfiguration:
         if len(first_row) == PrescCols.NAME.value:
             name = None
         elif len(first_row) > PrescCols.NAME.value:
-            name = " ".join(first_row[PrescCols.NAME.value :])
+            name = " ".join(first_row[PrescCols.NAME.value:])
         else:
             raise ValueError(f"{first_row}")
 
