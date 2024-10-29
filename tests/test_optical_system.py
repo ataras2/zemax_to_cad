@@ -31,22 +31,22 @@ class TestOpticalConfiguration:
             lines = f.readlines()
 
             string = '"Surface 1_X"'
-            assert any([string in line for line in lines])
+            assert any(string in line for line in lines)
 
             string = '"Surface 1_Y"'
-            assert any([string in line for line in lines])
+            assert any(string in line for line in lines)
 
             string = '"Surface 1_Z"'
-            assert any([string in line for line in lines])
+            assert any(string in line for line in lines)
 
             string = '"Surface 1_TILT_X"'
-            assert any([string in line for line in lines])
+            assert any(string in line for line in lines)
 
             string = '"Surface 1_TILT_Y"'
-            assert any([string in line for line in lines])
+            assert any(string in line for line in lines)
 
             string = '"Surface 1_TILT_Z"'
-            assert any([string in line for line in lines])
+            assert any(string in line for line in lines)
 
         os.remove(fname)
 
@@ -65,22 +65,22 @@ class TestOpticalConfiguration:
             lines = f.readlines()
 
             string = '"Surface 1_X_1"'
-            assert any([string in line for line in lines])
+            assert any(string in line for line in lines)
 
             string = '"Surface 1_Y_1"'
-            assert any([string in line for line in lines])
+            assert any(string in line for line in lines)
 
             string = '"Surface 1_Z_1"'
-            assert any([string in line for line in lines])
+            assert any(string in line for line in lines)
 
             string = '"Surface 1_TILT_X_1"'
-            assert any([string in line for line in lines])
+            assert any(string in line for line in lines)
 
             string = '"Surface 1_TILT_Y_1"'
-            assert any([string in line for line in lines])
+            assert any(string in line for line in lines)
 
             string = '"Surface 1_TILT_Z_1"'
-            assert any([string in line for line in lines])
+            assert any(string in line for line in lines)
 
         os.remove(fname)
 
