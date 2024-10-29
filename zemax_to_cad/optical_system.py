@@ -267,3 +267,5 @@ if __name__ == "__main__":
             format_filter_function=lambda x: zemax_to_cad.StateSubset.ALL(),
             use_config_number=False,
         )
+    
+    print("done")
