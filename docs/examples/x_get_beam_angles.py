@@ -9,8 +9,8 @@ config = zemax_to_cad.OpticalConfiguration.load_from_prescription_text(fname)
 
 # %%
 index = config.get_surface_index("Dichroic to Hi-5")
-index2 = config.get_surface_index("Focusing mirror")
 
-beam_vector = config.surfaces[index2].coords - config.surfaces[index].coords
+beam_vector = config.surfaces[index+1].coords - config.surfaces[index].coords
 
 angle_with_screwholes = np.rad2deg(np.arctan2(beam_vector[0], beam_vector[2]))
+angle_with_screwholes
