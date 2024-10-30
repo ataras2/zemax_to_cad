@@ -38,9 +38,9 @@ class OpticalConfiguration:
     def file_write(
         self,
         opened_file,
-        use_config_number=True,
         include_filter: callable = lambda x: True,
         format_filter_function: callable = lambda x: StateSubset.ALL(),
+        use_config_number=True,
     ):
         """Write out the surfaces of this object to a CAD readable txt file
 
@@ -267,5 +267,5 @@ if __name__ == "__main__":
             format_filter_function=lambda x: zemax_to_cad.StateSubset.ALL(),
             use_config_number=False,
         )
-    
+
     print("done")
