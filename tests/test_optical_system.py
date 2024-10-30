@@ -319,3 +319,11 @@ class TestMultiConfigSystem:
         assert not np.allclose(
             instrument.surfaces[0].coords, instrument_copy.surfaces[0].coords
         )
+
+    def test_reading_with_different_headers(self):
+        # file reading should be robust to different headers and find the right section
+        data_fname = "tests/large_presc_data.txt"
+
+        c = zemax_to_cad.OpticalConfiguration.load_from_prescription_text(
+            data_fname
+        )

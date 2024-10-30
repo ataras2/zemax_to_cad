@@ -138,17 +138,32 @@ class OpticalConfiguration:
             OpticalConfiguration: An object with all surfaces and a
                 corresponding configuration number
         """
-        with open(txt_file, encoding="utf-8") as f:
-            f_contents = f.readlines()
-
+        try:
+            with open(txt_file, encoding="utf-8") as f:
+                f_contents = f.readlines()
+        except UnicodeDecodeError:
+            with open(txt_file, "rb") as f:
+                f_contents = f.read(-1).decode("utf-16").split("\n")
         # trim off top
         # TODO: write simple code that detects where the start of table is
-        N_HEADER_ROWS = 8
+
+        for i, line in enumerate(f_contents):
+            if (
+                "GLOBAL VERTEX COORDINATES, ORIENTATIONS, AND ROTATION/OFFSET MATRICES"
+                in line
+            ):
+                N_HEADER_ROWS = i  + 8
+
         array_contents = f_contents[N_HEADER_ROWS:]
 
         surfs = []
         row = 0
         while row < len(array_contents):
+            if (
+                array_contents[row].strip() == ""
+                and array_contents[row - 1].strip() == ""
+            ):
+                break
             surfs.append(
                 OpticalConfiguration._generate_object(
                     array_contents[row : row + 3]
