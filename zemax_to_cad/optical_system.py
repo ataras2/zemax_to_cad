@@ -96,6 +96,21 @@ class OpticalConfiguration:
 
         return filter(fn, self.surfaces)
 
+    def get_surface_index(self, name: str):
+        """Get the index of the surface with the given name
+
+        Args:
+            name (str): The name of the surface to find
+
+        Returns:
+            int: The index of the surface with the given name, or None if
+                the surface is not found.
+        """
+        for i, surf in enumerate(self.surfaces):
+            if surf.name == name:
+                return i
+        return None
+
     @staticmethod
     def _safe_call_filter(filter_fn, inp, expected_type):
         """helper to call and check return type"""
