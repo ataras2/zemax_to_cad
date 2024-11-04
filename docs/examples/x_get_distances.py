@@ -33,7 +33,7 @@ for surf_index in range(start_idx, len(config.surfaces)):
         # we've found the focus
         last_surface = config.surfaces[surf_index - 1]
         d = config.distance_between_surfaces("Focusing mirror", last_surface)
-        print(f"Focus is at {f-d} mm from the {last_surface.name}")
+        print(f"Focus is at {f-d} mm after the {last_surface.name}")
         extra_distance = f - d
         break
 

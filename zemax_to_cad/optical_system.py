@@ -122,6 +122,26 @@ class OpticalConfiguration:
                 f.write(f"{surf.to_csv_line()}\n")
 
     def distance_between_surfaces(self, surf1, surf2):
+        """
+        Get the distance between two surfaces. Marches along the surfaces,
+        calculating the distance between each pair of surfaces, and summing.
+
+        Parameters
+        ----------
+        surf1 : str or int or Surface
+            The first surface to measure from. If a string, the name of the
+            surface. If an int, the index of the surface. If a Surface, the
+            surface object.
+        surf2 : str or int or Surface
+            The second surface to measure to. If a string, the name of the
+            surface. If an int, the index of the surface. If a Surface, the
+            surface object.
+
+        Returns
+        -------
+        float
+            The distance between the two surfaces, along the path of the beam
+        """
         d = 0
         if isinstance(surf1, str):
             surf1 = self.surfaces[self.get_surface_index(surf1)]
