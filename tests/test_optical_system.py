@@ -84,6 +84,19 @@ class TestOpticalConfiguration:
 
         os.remove(fname)
 
+    def test_from_csv(self):
+        data_fname = "tests/test_csv.csv"
+
+        c = zemax_to_cad.OpticalConfiguration.load_from_csv(data_fname)
+
+        assert len(c.surfaces) == 2
+        assert c.surfaces[0].name == "Surface 1"
+        assert np.allclose(c.surfaces[0].coords, [1.0, 2.0, 3.0])
+        assert np.allclose(c.surfaces[0].tilts, [0.1, 0.2, 0.3])
+        assert c.surfaces[1].name == "Dichroic"
+        assert np.allclose(c.surfaces[1].coords, [4.0, 5.0, 6.0])
+        assert np.allclose(c.surfaces[1].tilts, [0.4, 0.5, 0.6])
+
     def test_write_with_surface_filter(self):
         data_fname = "tests/test_data.txt"
 
@@ -155,6 +168,22 @@ class TestMultiConfigSystem:
         assert len(instrument.configs) == 2
         assert instrument.configs[0].surfaces[0].name == "Surface 1"
         assert instrument.configs[1].surfaces[0].name == "Surface 1"
+
+    def test_load_from_multiple_csvs(self):
+        c1 = "tests/test_csv.csv"
+        c2 = "tests/test_csv2.csv"
+
+        instrument = zemax_to_cad.MultiConfigSystem.load_from_multiple_csvs(
+            [c1, c2]
+        )
+
+        assert len(instrument.configs) == 2
+        assert instrument.configs[0].surfaces[0].name == "Surface 1"
+        assert np.allclose(instrument.configs[0].surfaces[0].coords, [1.0, 2.0, 3.0])
+        assert np.allclose(instrument.configs[0].surfaces[0].tilts, [0.1, 0.2, 0.3])
+        assert instrument.configs[1].surfaces[0].name == "Surface 1"
+        assert np.allclose(instrument.configs[1].surfaces[0].coords, [2.0, 2.0, 3.0])
+        assert np.allclose(instrument.configs[1].surfaces[0].tilts, [0.1, 0.2, 0.3])
 
     def test_transform(self):
         c1 = "tests/test_data.txt"

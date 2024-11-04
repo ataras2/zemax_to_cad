@@ -123,6 +123,26 @@ class OpticalConfiguration:
         )
 
     @staticmethod
+    def load_from_csv(file_name: str):
+        """Create a OpticalConfiguration object by reading from a csv file
+
+        Args:
+            file_name (str): A location for the file to be read
+
+        Returns:
+            OpticalConfiguration: An object with all surfaces and a
+                corresponding configuration number
+        """
+        with open(file_name, "r", encoding="utf-8") as f:
+            f_contents = f.readlines()
+
+        surfs = []
+        for line in f_contents:
+            surfs.append(Surface.from_csv_line(line))
+
+        return OpticalConfiguration(surfs)
+
+    @staticmethod
     def load_from_prescription_text(
         txt_file: str,
         config_number=DEFAULT_START_NUM,
@@ -152,7 +172,7 @@ class OpticalConfiguration:
                 "GLOBAL VERTEX COORDINATES, ORIENTATIONS, AND ROTATION/OFFSET MATRICES"
                 in line
             ):
-                N_HEADER_ROWS = i  + 8
+                N_HEADER_ROWS = i + 8
 
         array_contents = f_contents[N_HEADER_ROWS:]
 
@@ -241,6 +261,14 @@ class MultiConfigSystem:
         """
         for config in self.configs:
             config.transform(R, T, filter_fn)
+
+    @staticmethod
+    def load_from_multiple_csvs(csv_files: Sequence[str]):
+        configs = []
+        for csv_file in csv_files:
+            config = OpticalConfiguration.load_from_csv(csv_file)
+            configs.append(config)
+        return MultiConfigSystem(configs)
 
     @staticmethod
     def load_from_multiple_configs(file_list, config_numbers=None):

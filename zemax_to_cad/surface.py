@@ -127,6 +127,17 @@ class Surface:
 
         return "\n".join(s) + "\n"
 
+    @staticmethod
+    def from_csv_line(line):
+        """Create a surface from a line in a CSV file"""
+        parts = line.strip().split(",")
+        surf_idx = int(parts[0])
+        coords = np.array([float(x) for x in parts[1:4]])
+        tilts = np.array([float(x) for x in parts[4:7]])
+        name = parts[7] if len(parts) > 7 else None
+
+        return Surface(surf_idx, coords, tilts, name)
+
     def _cad_identifier(self):
         if self._name is not None:
             return str(self._name)
