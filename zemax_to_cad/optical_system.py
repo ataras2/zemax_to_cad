@@ -111,6 +111,16 @@ class OpticalConfiguration:
                 return i
         return None
 
+    def write_to_csv(self, file_name: str):
+        """Write out the surfaces of this object to a csv file
+
+        Args:
+            file_name (str): The location to write the file to
+        """
+        with open(file_name, "w", encoding="utf-8") as f:
+            for surf in self.surfaces:
+                f.write(f"{surf.to_csv_line()}\n")
+
     @staticmethod
     def _safe_call_filter(filter_fn, inp, expected_type):
         """helper to call and check return type"""

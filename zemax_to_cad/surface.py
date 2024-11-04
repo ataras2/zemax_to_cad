@@ -127,6 +127,16 @@ class Surface:
 
         return "\n".join(s) + "\n"
 
+    def to_csv_line(self):
+        """Write a surface to a CSV line"""
+        s = f"{self._surf_idx},"
+        s += ",".join([str(x) for x in self._coords])
+        s += ","
+        s += ",".join([str(x) for x in self._tilts])
+        if self._name is not None:
+            s += f",{self._name}"
+        return s
+
     @staticmethod
     def from_csv_line(line):
         """Create a surface from a line in a CSV file"""

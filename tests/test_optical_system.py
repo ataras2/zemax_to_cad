@@ -97,6 +97,27 @@ class TestOpticalConfiguration:
         assert np.allclose(c.surfaces[1].coords, [4.0, 5.0, 6.0])
         assert np.allclose(c.surfaces[1].tilts, [0.4, 0.5, 0.6])
 
+    def test_write_csv(self):
+        # test this by reading in a csv, writing it out, and then reading it back in, and checking the values
+        data_fname = "tests/test_csv.csv"
+
+        c = zemax_to_cad.OpticalConfiguration.load_from_csv(data_fname)
+
+        # write out the csv
+        fname = "tests/test.csv"
+        c.write_to_csv(fname)
+
+        # read it back in
+        c2 = zemax_to_cad.OpticalConfiguration.load_from_csv(fname)
+
+        assert len(c.surfaces) == len(c2.surfaces)
+        for s1, s2 in zip(c.surfaces, c2.surfaces):
+            assert s1.name == s2.name
+            assert np.allclose(s1.coords, s2.coords)
+            assert np.allclose(s1.tilts, s2.tilts)
+
+        os.remove(fname)
+
     def test_write_with_surface_filter(self):
         data_fname = "tests/test_data.txt"
 
@@ -179,11 +200,19 @@ class TestMultiConfigSystem:
 
         assert len(instrument.configs) == 2
         assert instrument.configs[0].surfaces[0].name == "Surface 1"
-        assert np.allclose(instrument.configs[0].surfaces[0].coords, [1.0, 2.0, 3.0])
-        assert np.allclose(instrument.configs[0].surfaces[0].tilts, [0.1, 0.2, 0.3])
+        assert np.allclose(
+            instrument.configs[0].surfaces[0].coords, [1.0, 2.0, 3.0]
+        )
+        assert np.allclose(
+            instrument.configs[0].surfaces[0].tilts, [0.1, 0.2, 0.3]
+        )
         assert instrument.configs[1].surfaces[0].name == "Surface 1"
-        assert np.allclose(instrument.configs[1].surfaces[0].coords, [2.0, 2.0, 3.0])
-        assert np.allclose(instrument.configs[1].surfaces[0].tilts, [0.1, 0.2, 0.3])
+        assert np.allclose(
+            instrument.configs[1].surfaces[0].coords, [2.0, 2.0, 3.0]
+        )
+        assert np.allclose(
+            instrument.configs[1].surfaces[0].tilts, [0.1, 0.2, 0.3]
+        )
 
     def test_transform(self):
         c1 = "tests/test_data.txt"

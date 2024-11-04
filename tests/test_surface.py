@@ -98,3 +98,19 @@ class TestSurface:
         assert np.allclose(s.coords, np.array([0.1, 0.0, -0.4]))
         assert np.allclose(s.tilts, np.array([0.0, 45.0, 0.0]))
         assert s.name is None
+
+    def test_to_csv_line(self):
+        s = zemax_to_cad.Surface(
+            0,
+            np.array([0.1, 0.0, -0.4]),
+            np.array([0.0, 45.0, 0.0]),
+            name="text",
+        )
+        assert s.to_csv_line() == "0,0.1,0.0,-0.4,0.0,45.0,0.0,text"
+
+        s = zemax_to_cad.Surface(
+            0,
+            np.array([0.1, 0.0, -0.4]),
+            np.array([0.0, 45.0, 0.0]),
+        )
+        assert s.to_csv_line() == "0,0.1,0.0,-0.4,0.0,45.0,0.0"
