@@ -201,6 +201,14 @@ class OpticalConfiguration:
             )
             row += 4  # each object is four rows, 3 of data and one blank
 
+        # notify the user if surfs have duplicate names, and what the names are
+        names = [surf.name for surf in surfs]
+        if len(names) != len(set(names)):
+            print(
+                "Warning: Duplicate surface names detected in prescription file:"
+            )
+            print([name for name in names if names.count(name) > 1])
+
         return OpticalConfiguration(surfs, config_number)
 
     @staticmethod
