@@ -121,6 +121,28 @@ class OpticalConfiguration:
             for surf in self.surfaces:
                 f.write(f"{surf.to_csv_line()}\n")
 
+    def distance_between_surfaces(self, surf1, surf2):
+        d = 0
+        if isinstance(surf1, str):
+            surf1 = self.surfaces[self.get_surface_index(surf1)]
+        if isinstance(surf2, str):
+            surf2 = self.surfaces[self.get_surface_index(surf2)]
+
+        if isinstance(surf1, int):
+            surf1 = self.surfaces[surf1]
+        if isinstance(surf2, int):
+            surf2 = self.surfaces[surf2]
+
+        start_idx = self.get_surface_index(surf1.name)
+        end_idx = self.get_surface_index(surf2.name)
+        for surf_index in range(start_idx, end_idx):
+            cur_surf = self.surfaces[surf_index]
+            next_surf = self.surfaces[surf_index + 1]
+
+            # get the distance between the surfaces
+            d += np.linalg.norm(cur_surf.coords - next_surf.coords)
+        return d
+
     @staticmethod
     def _safe_call_filter(filter_fn, inp, expected_type):
         """helper to call and check return type"""
@@ -202,12 +224,14 @@ class OpticalConfiguration:
             row += 4  # each object is four rows, 3 of data and one blank
 
         # notify the user if surfs have duplicate names, and what the names are
+        # ignore "None" names
         names = [surf.name for surf in surfs]
+        names = [name for name in names if name is not None]
         if len(names) != len(set(names)):
             print(
                 "Warning: Duplicate surface names detected in prescription file:"
             )
-            print([name for name in names if names.count(name) > 1])
+            print(list({name for name in names if names.count(name) > 1}))
 
         return OpticalConfiguration(surfs, config_number)
 
