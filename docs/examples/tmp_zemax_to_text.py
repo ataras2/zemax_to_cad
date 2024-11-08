@@ -1,14 +1,28 @@
-import clr, os, winreg
-from itertools import islice
+"""
+This is a script to connect to Zemax OpticStudio and extract the prescription data for a system.
+"""
+
+import clr, os, winreg  # requires pythonnet module
 import os
 
-# This boilerplate requires the 'pythonnet' module.
-# The following instructions are for installing the 'pythonnet' module via pip:
-#    1. Ensure you are running a Python version compatible with PythonNET. Check the article "ZOS-API using Python.NET" or
-#    "Getting started with Python" in our knowledge base for more details.
-#    2. Install 'pythonnet' from pip via a command prompt (type 'cmd' from the start menu or press Windows + R and type 'cmd' then enter)
-#
-#        python -m pip install pythonnet
+# for single config ------------------
+configs = None
+output_fname = "test.txt"
+output_path = os.getcwd()
+# ------------------------------------
+
+# for multi config -------------------
+# configs = list(range(1,5))
+# output_fname = lambda x: f"test_h{x}.txt"
+# output_path = os.getcwd()
+# ------------------------------------
+
+# path to the OpticStudio installation folder
+pathToInstall = r"C:\Program Files\Ansys Zemax OpticStudio 2024 R1.00"
+# pathToInstall = r'C:\C:\Program Files\Zemax OpticStudio'
+
+
+# Start of script, do not modify below this line ----------------------------------
 
 # determine the Zemax working directory
 aKey = winreg.OpenKey(
@@ -27,10 +41,6 @@ winreg.CloseKey(aKey)
 clr.AddReference(NetHelper)
 import ZOSAPI_NetHelper
 
-pathToInstall = ""
-# uncomment the following line to use a specific instance of the ZOS-API assemblies
-# pathToInstall = r'C:\C:\Program Files\Zemax OpticStudio'
-pathToInstall = r"C:\Program Files\Ansys Zemax OpticStudio 2024 R1.00"
 
 # connect to OpticStudio
 success = ZOSAPI_NetHelper.ZOSAPI_Initializer.Initialize(pathToInstall)
@@ -40,7 +50,7 @@ if success:
     zemaxDir = ZOSAPI_NetHelper.ZOSAPI_Initializer.GetZemaxDirectory()
     print("Found OpticStudio at:   %s" + zemaxDir)
 else:
-    raise Exception("Cannot find OpticStudio")
+    raise ImportError("Cannot find OpticStudio")
 
 # load the ZOS-API assemblies
 clr.AddReference(os.path.join(os.sep, zemaxDir, r"ZOSAPI.dll"))
@@ -49,20 +59,24 @@ import ZOSAPI
 
 TheConnection = ZOSAPI.ZOSAPI_Connection()
 if TheConnection is None:
-    raise Exception("Unable to intialize NET connection to ZOSAPI")
+    raise RuntimeError("Unable to intialize NET connection to ZOSAPI")
 
 TheApplication = TheConnection.ConnectAsExtension(0)
 if TheApplication is None:
-    raise Exception("Unable to acquire ZOSAPI application")
+    raise RuntimeError("Unable to acquire ZOSAPI application")
+
+input(
+    "Press the interactive extension button in OpticStudio and press Enter to continue..."
+)
 
 if TheApplication.IsValidLicenseForAPI == False:
-    raise Exception(
+    raise RuntimeError(
         "License is not valid for ZOSAPI use.  Make sure you have enabled 'Programming > Interactive Extension' from the OpticStudio GUI."
     )
 
 TheSystem = TheApplication.PrimarySystem
 if TheSystem is None:
-    raise Exception("Unable to acquire Primary system")
+    raise RuntimeError("Unable to acquire Primary system")
 
 
 print("Connected to OpticStudio")
@@ -71,29 +85,30 @@ print("Connected to OpticStudio")
 print("Serial #: ", TheApplication.SerialCode)
 
 
-
-# for single config:
-# prescriptionReport = TheSystem.Analyses.New_Analysis(
-#     ZOSAPI.Analysis.AnalysisIDM.PrescriptionDataSettings
-# )
-
-# prescriptionReport.ApplyAndWaitForCompletion()
-# # prescriptionReport.ToFile(os.path.join(os.getcwd(), "test.txt"), show_settings=True)
-# prescriptionReport.GetResults().GetTextFile(os.path.join(os.getcwd(), "test_h.txt"))
-
-
-# for multi config:
-
-configs_to_run = list(range(1, 5))
-
-
-prescriptionReport = TheSystem.Analyses.New_Analysis(
-    ZOSAPI.Analysis.AnalysisIDM.PrescriptionDataSettings
-)
-
-for config in configs_to_run:
-    TheSystem.MCE.SetCurrentConfiguration(config)
-    prescriptionReport.ApplyAndWaitForCompletion()
-    prescriptionReport.GetResults().GetTextFile(
-        os.path.join(os.getcwd(), f"test_h{config}.txt")
+if configs is None:
+    prescriptionReport = TheSystem.Analyses.New_Analysis(
+        ZOSAPI.Analysis.AnalysisIDM.PrescriptionDataSettings
     )
+
+    prescriptionReport.ApplyAndWaitForCompletion()
+    # prescriptionReport.ToFile(os.path.join(os.getcwd(), "test.txt"), show_settings=True)
+    prescriptionReport.GetResults().GetTextFile(
+        os.path.join(output_path, output_fname)
+    )
+
+    print(f"Prescription data saved to {output_fname}")
+
+else:
+    prescriptionReport = TheSystem.Analyses.New_Analysis(
+        ZOSAPI.Analysis.AnalysisIDM.PrescriptionDataSettings
+    )
+
+    for config in configs:
+        TheSystem.MCE.SetCurrentConfiguration(config)
+        prescriptionReport.ApplyAndWaitForCompletion()
+        prescriptionReport.GetResults().GetTextFile(
+            os.path.join(os.getcwd(), f"test_h{config}.txt")
+        )
+        print(f"Successfully saved prescription data for config {config}")
+
+    print(f"Prescription data saved to {output_fname}")
