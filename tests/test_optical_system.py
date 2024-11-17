@@ -15,6 +15,7 @@ class TestOpticalConfiguration:
         assert c.surfaces[1].name == "Dichroic"
 
     def test_write(self):
+        """tests the simplest case of writing out a file"""
         data_fname = "tests/test_data.txt"
 
         c = zemax_to_cad.OpticalConfiguration.load_from_prescription_text(
