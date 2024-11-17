@@ -40,12 +40,12 @@ class OpticalConfiguration:
         opened_file,
         include_filter: callable = lambda x: True,
         format_filter_function: callable = lambda x: StateSubset.ALL(),
+        use_config_number=True,
     ):
         """Write out the surfaces of this object to a CAD readable txt file
 
-        Args: #TODO check type of opened_file
-            opened_file (_type_): A file object that is opened and we can
-                call write on.
+        Args:
+            opened_file (file): An open file to write to
             include_filter (callable): A function surface -> boolean that,
                 if True, indicates that the surface should be written.
                 Defaults to writing all surfaces.
@@ -53,12 +53,16 @@ class OpticalConfiguration:
                 surface -> list[StateSubset] indicating what components of
                 the position to write out. Defaults to writing all components.
         """
+        kwargs = {}
+        if use_config_number:
+            kwargs["config"] = self.config_number
 
         for surf in self._get_safe_surface_filter(include_filter, bool):
             str_to_add = surf.to_cad_string(
                 OpticalConfiguration._safe_call_filter(
                     format_filter_function, surf, list
-                )
+                ),
+                **kwargs,
             )
 
             # add string to file
@@ -92,6 +96,73 @@ class OpticalConfiguration:
 
         return filter(fn, self.surfaces)
 
+    def get_surface_index(self, name: str):
+        """Get the index of the surface with the given name
+
+        Args:
+            name (str): The name of the surface to find
+
+        Returns:
+            int: The index of the surface with the given name, or None if
+                the surface is not found.
+        """
+        for i, surf in enumerate(self.surfaces):
+            if surf.name == name:
+                return i
+        return None
+
+    def write_to_csv(self, file_name: str):
+        """Write out the surfaces of this object to a csv file
+
+        Args:
+            file_name (str): The location to write the file to
+        """
+        with open(file_name, "w", encoding="utf-8") as f:
+            for surf in self.surfaces:
+                f.write(f"{surf.to_csv_line()}\n")
+
+    def distance_between_surfaces(self, surf1, surf2):
+        """
+        Get the distance between two surfaces. Marches along the surfaces,
+        calculating the distance between each pair of surfaces, and summing.
+
+        Parameters
+        ----------
+        surf1 : str or int or Surface
+            The first surface to measure from. If a string, the name of the
+            surface. If an int, the index of the surface. If a Surface, the
+            surface object.
+        surf2 : str or int or Surface
+            The second surface to measure to. If a string, the name of the
+            surface. If an int, the index of the surface. If a Surface, the
+            surface object.
+
+        Returns
+        -------
+        float
+            The distance between the two surfaces, along the path of the beam
+        """
+        d = 0
+        if isinstance(surf1, str):
+            surf1 = self.surfaces[self.get_surface_index(surf1)]
+        if isinstance(surf2, str):
+            surf2 = self.surfaces[self.get_surface_index(surf2)]
+
+        if isinstance(surf1, int):
+            surf1 = self.surfaces[surf1]
+        if isinstance(surf2, int):
+            surf2 = self.surfaces[surf2]
+
+        start_idx = self.get_surface_index(surf1.name)
+        end_idx = self.get_surface_index(surf2.name)
+        for surf_index in range(start_idx, end_idx):
+            cur_surf = self.surfaces[surf_index]
+            next_surf = self.surfaces[surf_index + 1]
+
+            # get the distance between the surfaces
+            d += np.linalg.norm(cur_surf.coords - next_surf.coords)
+        return d
+
     @staticmethod
     def _safe_call_filter(filter_fn, inp, expected_type):
         """helper to call and check return type"""
@@ -102,6 +173,26 @@ class OpticalConfiguration:
             f"{rval}={filter_fn}({inp}) is a {type(rval)}, \
             not a {expected_type}"
         )
+
+    @staticmethod
+    def load_from_csv(file_name: str):
+        """Create a OpticalConfiguration object by reading from a csv file
+
+        Args:
+            file_name (str): A location for the file to be read
+
+        Returns:
+            OpticalConfiguration: An object with all surfaces and a
+                corresponding configuration number
+        """
+        with open(file_name, "r", encoding="utf-8") as f:
+            f_contents = f.readlines()
+
+        surfs = []
+        for line in f_contents:
+            surfs.append(Surface.from_csv_line(line))
+
+        return OpticalConfiguration(surfs)
 
     @staticmethod
     def load_from_prescription_text(
@@ -119,23 +210,48 @@ class OpticalConfiguration:
             OpticalConfiguration: An object with all surfaces and a
                 corresponding configuration number
         """
-        with open(txt_file, encoding="utf-8") as f:
-            f_contents = f.readlines()
-
+        try:
+            with open(txt_file, encoding="utf-8") as f:
+                f_contents = f.readlines()
+        except UnicodeDecodeError:
+            with open(txt_file, "rb") as f:
+                f_contents = f.read(-1).decode("utf-16").split("\n")
         # trim off top
         # TODO: write simple code that detects where the start of table is
-        N_HEADER_ROWS = 8
+
+        for i, line in enumerate(f_contents):
+            if (
+                "GLOBAL VERTEX COORDINATES, ORIENTATIONS, AND ROTATION/OFFSET MATRICES"
+                in line
+            ):
+                N_HEADER_ROWS = i + 8
+
         array_contents = f_contents[N_HEADER_ROWS:]
 
         surfs = []
         row = 0
         while row < len(array_contents):
+            if (
+                array_contents[row].strip() == ""
+                and array_contents[row - 1].strip() == ""
+            ):
+                break
             surfs.append(
                 OpticalConfiguration._generate_object(
                     array_contents[row : row + 3]
                 )
             )
             row += 4  # each object is four rows, 3 of data and one blank
+
+        # notify the user if surfs have duplicate names, and what the names are
+        # ignore "None" names
+        names = [surf.name for surf in surfs]
+        names = [name for name in names if name is not None]
+        if len(names) != len(set(names)):
+            print(
+                "Warning: Duplicate surface names detected in prescription file:"
+            )
+            print(list({name for name in names if names.count(name) > 1}))
 
         return OpticalConfiguration(surfs, config_number)
 
@@ -195,15 +311,81 @@ class MultiConfigSystem:
                 format_filter_function,
             )
 
+    def transform(
+        self,
+        R: np.ndarray = np.eye(3),
+        T: np.ndarray = np.zeros(3),
+        filter_fn: callable = lambda x: True,
+    ):
+        """transform all surfaces in all configurations
+
+        See OpticalConfiguration.transform for argument details
+        """
+        for config in self.configs:
+            config.transform(R, T, filter_fn)
+
     @staticmethod
-    def load_from_multiple_configs(file_list, cofnig_numbers=None):
-        if cofnig_numbers is None:
-            cofnig_numbers = list(range(len(file_list)))
+    def load_from_multiple_csvs(csv_files: Sequence[str]):
+        configs = []
+        for csv_file in csv_files:
+            config = OpticalConfiguration.load_from_csv(csv_file)
+            configs.append(config)
+        return MultiConfigSystem(configs)
+
+    @staticmethod
+    def load_from_multiple_configs(file_list, config_numbers=None):
+        if config_numbers is None:
+            config_numbers = list(range(1, 1 + len(file_list)))
+
+        configs = []
+        for i, file in enumerate(file_list):
+            config = OpticalConfiguration.load_from_prescription_text(
+                file, config_numbers[i]
+            )
+
+            configs.append(config)
+
+        return MultiConfigSystem(configs)
 
 
 if __name__ == "__main__":
-    c = OpticalConfiguration.load_from_prescription_text(
-        "docs/data/coords_small_c1.txt"
+    # c = OpticalConfiguration.load_from_prescription_text(
+    #     "docs/data/coords_small_c1.txt"
+    # )
+
+    # with open("test.txt", "w", encoding="utf-8") as f:
+    #     c.file_write(f)
+
+    # instrument = MultiConfigSystem.load_from_multiple_configs(
+    #     ["docs/data/coords_small_c1.txt", "docs/data/coords_small_c2.txt"]
+    # )
+
+    # instrument.transform(
+    #     R=np.eye(3),
+    #     T=np.array([-1_000_000.0, 0.0, 0.0]),
+    #     filter_fn=lambda x: x.name in ["mirror"],
+    # )
+
+    # print(instrument.configs[0].surfaces[0])
+
+    # with open("test.txt", "w", encoding="utf-8") as f:
+    #     instrument.file_write(f)
+
+    data_fname = "tests/test_data.txt"
+
+    import zemax_to_cad
+
+    c = zemax_to_cad.OpticalConfiguration.load_from_prescription_text(
+        data_fname
     )
 
-    c.file_write(open("test.txt", "w", encoding="utf-8"))
+    fname = "tests/test.txt"
+    with open(fname, "w", encoding="utf-8") as f:
+        c.file_write(
+            f,
+            include_filter=lambda x: x.name in ["Surface 1"],
+            format_filter_function=lambda x: zemax_to_cad.StateSubset.ALL(),
+            use_config_number=False,
+        )
+
+    print("done")
